@@ -1,0 +1,486 @@
+{
+ "player": 1000.0,
+ "target": 0.9,
+ "games": [
+  {
+   "game": 1,
+   "opp_level": 718,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 11.78,
+   "secs": 5.8
+  },
+  {
+   "game": 2,
+   "opp_level": 379,
+   "score": 1.0,
+   "how": "checkmate",
+   "bloss": 3.33,
+   "secs": 2.6
+  },
+  {
+   "game": 3,
+   "opp_level": 640,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 5.55,
+   "secs": 3.1
+  },
+  {
+   "game": 4,
+   "opp_level": 691,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 3.32,
+   "secs": 4.5
+  },
+  {
+   "game": 5,
+   "opp_level": 800,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 3.91,
+   "secs": 5.3
+  },
+  {
+   "game": 6,
+   "opp_level": 849,
+   "score": 0.5,
+   "how": "draw",
+   "bloss": 5.1,
+   "secs": 9.9
+  },
+  {
+   "game": 7,
+   "opp_level": 809,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 5.33,
+   "secs": 3.8
+  },
+  {
+   "game": 8,
+   "opp_level": 818,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 1.99,
+   "secs": 4.6
+  },
+  {
+   "game": 9,
+   "opp_level": 827,
+   "score": 0.0,
+   "how": "adjudicated",
+   "bloss": 5.05,
+   "secs": 3.5
+  },
+  {
+   "game": 10,
+   "opp_level": 755,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 5.27,
+   "secs": 3.4
+  },
+  {
+   "game": 11,
+   "opp_level": 762,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 0.83,
+   "secs": 2.8
+  },
+  {
+   "game": 12,
+   "opp_level": 769,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 3.54,
+   "secs": 4.1
+  },
+  {
+   "game": 13,
+   "opp_level": 777,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 4.25,
+   "secs": 4.0
+  },
+  {
+   "game": 14,
+   "opp_level": 784,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 8.37,
+   "secs": 6.3
+  },
+  {
+   "game": 15,
+   "opp_level": 791,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 2.72,
+   "secs": 3.1
+  },
+  {
+   "game": 16,
+   "opp_level": 798,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 2.37,
+   "secs": 2.9
+  },
+  {
+   "game": 17,
+   "opp_level": 805,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 10.69,
+   "secs": 7.3
+  },
+  {
+   "game": 18,
+   "opp_level": 812,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 6.16,
+   "secs": 3.6
+  },
+  {
+   "game": 19,
+   "opp_level": 819,
+   "score": 0.0,
+   "how": "adjudicated",
+   "bloss": 6.78,
+   "secs": 7.1
+  },
+  {
+   "game": 20,
+   "opp_level": 761,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 6.33,
+   "secs": 7.0
+  },
+  {
+   "game": 21,
+   "opp_level": 767,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 5.03,
+   "secs": 3.5
+  },
+  {
+   "game": 22,
+   "opp_level": 773,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 7.04,
+   "secs": 3.4
+  },
+  {
+   "game": 23,
+   "opp_level": 779,
+   "score": 1.0,
+   "how": "checkmate",
+   "bloss": 6.85,
+   "secs": 4.0
+  },
+  {
+   "game": 24,
+   "opp_level": 785,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 6.19,
+   "secs": 6.7
+  },
+  {
+   "game": 25,
+   "opp_level": 791,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 2.25,
+   "secs": 4.1
+  },
+  {
+   "game": 26,
+   "opp_level": 797,
+   "score": 0.0,
+   "how": "adjudicated",
+   "bloss": 9.48,
+   "secs": 2.6
+  },
+  {
+   "game": 27,
+   "opp_level": 746,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 6.71,
+   "secs": 5.5
+  },
+  {
+   "game": 28,
+   "opp_level": 751,
+   "score": 0.0,
+   "how": "adjudicated",
+   "bloss": 5.93,
+   "secs": 9.2
+  },
+  {
+   "game": 29,
+   "opp_level": 706,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 4.02,
+   "secs": 5.5
+  },
+  {
+   "game": 30,
+   "opp_level": 711,
+   "score": 0.5,
+   "how": "draw",
+   "bloss": 3.33,
+   "secs": 8.3
+  },
+  {
+   "game": 31,
+   "opp_level": 692,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 4.88,
+   "secs": 4.2
+  },
+  {
+   "game": 32,
+   "opp_level": 697,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 4.06,
+   "secs": 5.7
+  },
+  {
+   "game": 33,
+   "opp_level": 701,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 5.34,
+   "secs": 3.8
+  },
+  {
+   "game": 34,
+   "opp_level": 706,
+   "score": 0.5,
+   "how": "draw",
+   "bloss": 2.68,
+   "secs": 8.9
+  },
+  {
+   "game": 35,
+   "opp_level": 688,
+   "score": 1.0,
+   "how": "checkmate",
+   "bloss": 3.28,
+   "secs": 3.0
+  },
+  {
+   "game": 36,
+   "opp_level": 693,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 2.88,
+   "secs": 4.1
+  },
+  {
+   "game": 37,
+   "opp_level": 697,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 2.1,
+   "secs": 3.1
+  },
+  {
+   "game": 38,
+   "opp_level": 701,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 4.11,
+   "secs": 4.3
+  },
+  {
+   "game": 39,
+   "opp_level": 705,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 8.57,
+   "secs": 4.7
+  },
+  {
+   "game": 40,
+   "opp_level": 709,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 6.7,
+   "secs": 7.1
+  },
+  {
+   "game": 41,
+   "opp_level": 713,
+   "score": 0.0,
+   "how": "checkmate",
+   "bloss": 5.74,
+   "secs": 5.2
+  },
+  {
+   "game": 42,
+   "opp_level": 677,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 2.31,
+   "secs": 3.6
+  },
+  {
+   "game": 43,
+   "opp_level": 681,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 3.41,
+   "secs": 2.9
+  },
+  {
+   "game": 44,
+   "opp_level": 685,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 2.58,
+   "secs": 3.8
+  },
+  {
+   "game": 45,
+   "opp_level": 689,
+   "score": 0.0,
+   "how": "checkmate",
+   "bloss": 6.0,
+   "secs": 2.7
+  },
+  {
+   "game": 46,
+   "opp_level": 655,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 3.14,
+   "secs": 4.1
+  },
+  {
+   "game": 47,
+   "opp_level": 659,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 5.93,
+   "secs": 3.2
+  },
+  {
+   "game": 48,
+   "opp_level": 662,
+   "score": 1.0,
+   "how": "checkmate",
+   "bloss": 5.07,
+   "secs": 4.7
+  },
+  {
+   "game": 49,
+   "opp_level": 666,
+   "score": 0.0,
+   "how": "adjudicated",
+   "bloss": 7.75,
+   "secs": 4.4
+  },
+  {
+   "game": 50,
+   "opp_level": 634,
+   "score": 0.0,
+   "how": "adjudicated",
+   "bloss": 8.08,
+   "secs": 2.8
+  },
+  {
+   "game": 51,
+   "opp_level": 602,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 6.02,
+   "secs": 3.0
+  },
+  {
+   "game": 52,
+   "opp_level": 605,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 4.0,
+   "secs": 2.9
+  },
+  {
+   "game": 53,
+   "opp_level": 609,
+   "score": 0.0,
+   "how": "adjudicated",
+   "bloss": 5.68,
+   "secs": 6.6
+  },
+  {
+   "game": 54,
+   "opp_level": 578,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 5.19,
+   "secs": 4.9
+  },
+  {
+   "game": 55,
+   "opp_level": 581,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 5.8,
+   "secs": 5.5
+  },
+  {
+   "game": 56,
+   "opp_level": 584,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 0.94,
+   "secs": 3.7
+  },
+  {
+   "game": 57,
+   "opp_level": 588,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 12.0,
+   "secs": 5.2
+  },
+  {
+   "game": 58,
+   "opp_level": 591,
+   "score": 1.0,
+   "how": "adjudicated",
+   "bloss": 5.64,
+   "secs": 5.3
+  },
+  {
+   "game": 59,
+   "opp_level": 594,
+   "score": 1.0,
+   "how": "checkmate",
+   "bloss": 5.88,
+   "secs": 4.6
+  },
+  {
+   "game": 60,
+   "opp_level": 598,
+   "score": 1.0,
+   "how": "checkmate",
+   "bloss": 2.58,
+   "secs": 3.2
+  }
+ ]
+}

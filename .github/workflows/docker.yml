@@ -1,0 +1,87 @@
+name: test-and-docker
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Stockfish, PHP and python-chess
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends stockfish php-cli
+          pip install -r requirements.txt
+      - name: Unit and relay tests
+        env:
+          CC_STOCKFISH: /usr/games/stockfish
+        run: python -m unittest discover -v tests
+
+  docker:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: chess-companion:test
+      - name: Start container
+        run: |
+          PW="ci-$(openssl rand -hex 6)"
+          echo "family=$PW" > pw.txt
+          docker run -d --name cc -p 8765:8765 \
+            -e CC_FAMILY_PASSWORD="$PW" -e CC_ADMIN_PASSWORD="$PW-admin" chess-companion:test
+          for i in $(seq 1 30); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' cc)" = healthy ] && break; sleep 2
+          done
+          docker inspect -f '{{.State.Health.Status}}' cc
+          docker logs cc
+      - name: Play a full game against the container
+        run: |
+          pip install -r requirements.txt
+          python tools/e2e.py http://127.0.0.1:8765/ pw.txt
+      - name: Web app is served, private paths are not
+        run: |
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8765/)" = 200
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8765/data/chess.db)" = 404
+          test "$(curl -s -o /dev/null -w '%{http_code}' --path-as-is http://127.0.0.1:8765/../server/config.py)" = 404
+      - name: Container log
+        if: always()
+        run: docker logs cc || true
+
+      - name: Log in to GitHub Container Registry
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-qemu-action@v3
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      - name: Image name (registry names must be lower case)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/chess-companion" >> "$GITHUB_ENV"
+      - name: Publish image (amd64 + arm64)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}

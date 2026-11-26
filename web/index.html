@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2b2622">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'">
+<title>Chess Companion</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="vendor/chessground.base.css">
+<link rel="stylesheet" href="vendor/chessground.brown.css">
+<link rel="stylesheet" href="vendor/chessground.cburnett.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="app">
+
+  <section id="s-loading" class="screen center"><p class="big">Chess Companion</p><p id="loading-msg">Connecting…</p></section>
+
+  <section id="s-setup" class="screen center" hidden>
+    <h1>Welcome to Chess Companion</h1>
+    <p>Choose two passwords. The <b>family password</b> is what everyone types once on their phone or tablet.
+       The <b>admin password</b> is only for you (it manages devices and AI coaching).</p>
+    <form id="f-setup" class="stack">
+      <label>Family password <input name="family" type="password" minlength="6" required autocomplete="new-password"></label>
+      <label>Admin password <input name="admin" type="password" minlength="6" required autocomplete="new-password"></label>
+      <button class="primary">Save</button>
+    </form>
+  </section>
+
+  <section id="s-login" class="screen center" hidden>
+    <h1>Chess Companion</h1>
+    <form id="f-login" class="stack">
+      <label>Family password <input name="password" type="password" required autocomplete="current-password"></label>
+      <label>Name for this device <input name="device" placeholder="e.g. kitchen tablet" maxlength="40"></label>
+      <button class="primary">Come in</button>
+    </form>
+  </section>
+
+  <section id="s-players" class="screen center" hidden>
+    <h1>Who is playing?</h1>
+    <div id="player-list" class="stack"></div>
+    <details class="new-player">
+      <summary class="btn">+ New player</summary>
+      <form id="f-player" class="stack">
+        <label>First name or nickname <input name="name" maxlength="24" required></label>
+        <div class="seg" role="radiogroup" aria-label="Age">
+          <label><input type="radio" name="age_group" value="child" checked> Child</label>
+          <label><input type="radio" name="age_group" value="teen"> Teen</label>
+          <label><input type="radio" name="age_group" value="adult"> Adult</label>
+        </div>
+        <p class="small">That's all we need. No rating needed: the computer works out how strong you are as you play.</p>
+        <button class="primary">Start</button>
+      </form>
+    </details>
+  </section>
+
+  <section id="s-game" class="screen" hidden>
+    <header class="bar">
+      <button id="b-menu" class="icon" aria-label="Menu">☰</button>
+      <div class="who"><span id="g-name"></span> <span id="g-level" class="pill"></span></div>
+      <button id="b-sound" class="icon" aria-label="Sound on/off">🔊</button>
+    </header>
+    <div class="play">
+      <div class="board-wrap"><div id="board" class="cg-wrap"></div>
+        <div id="promo" class="promo" hidden></div>
+        <div id="banner" class="banner" hidden></div>
+        <div id="toast" class="toast" role="alert" hidden></div>
+      </div>
+      <div class="side">
+        <p id="status" class="status" aria-live="polite"></p>
+        <p id="moverate" class="moverate" aria-live="polite"></p>
+        <p id="caption" class="caption"></p>
+        <div class="coach">
+          <button data-k="hint">💡<span>Give me a hint</span></button>
+          <button data-k="danger">⚠️<span>Am I in danger?</span></button>
+          <button data-k="winning">⚖️<span>Am I winning?</span></button>
+          <button data-k="plan">🧭<span>What is my plan?</span></button>
+          <button data-k="explain">❓<span>Explain the last move</span></button>
+          <button data-k="best">⭐<span>Show me the best move</span></button>
+        </div>
+        <div class="tools">
+          <button id="b-undo">↶ Undo</button>
+          <button id="b-repeat">🔁 Repeat</button>
+          <button id="b-new">＋ New game</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<dialog id="d-menu" class="sheet">
+  <h2>Menu</h2>
+  <div class="stack">
+    <button data-m="new">New game</button>
+    <button data-m="challenge">Challenge</button>
+    <button data-m="stars" id="m-stars">Move stars: on</button>
+    <button data-m="history">Game history</button>
+    <button data-m="pgn">Export this game (PGN)</button>
+    <button data-m="resign">Resign this game</button>
+    <button data-m="players">Change player</button>
+    <button data-m="admin" class="quiet">Family settings</button>
+    <button data-m="close" class="quiet">Close</button>
+  </div>
+</dialog>
+
+<dialog id="d-new" class="sheet">
+  <h2>New game</h2>
+  <p id="new-warn" class="warn" hidden>Your current game will count as a loss.</p>
+  <div class="stack">
+    <button data-c="white" class="primary">Play as White</button>
+    <button data-c="black" class="primary">Play as Black</button>
+    <button data-c="random">Surprise me</button>
+    <button data-c="cancel" class="quiet">Cancel</button>
+  </div>
+</dialog>
+
+<dialog id="d-challenge" class="sheet">
+  <h2>Challenge</h2>
+  <p>How often would you like to win?</p>
+  <p class="big center"><span id="ch-val">65</span>%</p>
+  <input id="ch-range" type="range" min="10" max="90" step="5" value="65" aria-label="Target win rate">
+  <p class="small">The computer changes its strength slowly, over several games, until you win about this often.
+    Lower means harder games. The setting applies from your next game.</p>
+  <div class="stack"><button id="ch-save" class="primary">Save</button><button class="quiet" data-close>Cancel</button></div>
+</dialog>
+
+<dialog id="d-history" class="sheet">
+  <h2>Game history</h2>
+  <div id="h-stats"></div>
+  <div id="h-list" class="hlist"></div>
+  <div class="stack"><button class="quiet" data-close>Close</button></div>
+</dialog>
+
+<dialog id="d-admin" class="sheet">
+  <h2>Family settings</h2>
+  <form id="f-admin" class="stack">
+    <label>Admin password <input name="pw" type="password" required autocomplete="current-password"></label>
+    <button class="primary">Open</button>
+  </form>
+  <div id="admin-body"></div>
+  <div class="stack"><button class="quiet" data-close>Close</button></div>
+</dialog>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+data/
+data-test/
+sim/*.log
+__pycache__/
+*.pyc
+engine/stockfish.exe
+web-live/
+sim/*.log
+.env

@@ -1,0 +1,12 @@
+.git
+.github
+data
+data-test
+web-live
+sim
+engine
+tests
+tools
+*.md
+.env
+**/__pycache__

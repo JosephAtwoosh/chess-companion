@@ -1,0 +1,15 @@
+services:
+  chess-companion:
+    build: .
+    # or use the published image instead of building:
+    # image: ghcr.io/josephatwoosh/chess-companion:latest
+    container_name: chess-companion
+    restart: unless-stopped
+    ports:
+      - "8765:8765"
+    env_file: .env
+    volumes:
+      - chess-data:/data
+
+volumes:
+  chess-data:
