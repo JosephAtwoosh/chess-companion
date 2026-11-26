@@ -62,7 +62,18 @@ requests waiting in `data/queue/`, which `.htaccess` blocks. After 10 wrong rela
 
 To update the site later, run `deploy.py` again and upload the folder (`deploy.py` never touches anything in `data/`).
 
-## 5. AI coaching (optional; engine coaching always works)
+## 5. Devices and bans
+
+Open <http://localhost/chess-companion/admin.html> on the PC (no password needed there). It lists every device
+that has typed the family password, with its kind (e.g. "Chrome on Android tablet") and last address, plus 30 days of
+sign-ins and wrong passwords. **Ban** stops a device at once, even if the family password is typed on it again.
+**Ban + address** also blocks its internet address. You can also ban an address range such as `81.2.3.0/24`.
+Clearing a browser's data gets round a device ban, and home and mobile addresses change, so if someone keeps coming
+back, also change the family password. Requests that arrive through the website relay never count as "on the PC",
+so the page asks for the admin password if it is opened through the website. Upload `api.php` again after
+updating, so the website passes each browser's kind on.
+
+## 6. AI coaching (optional; engine coaching always works)
 
 - **Claude:** if Claude Code is installed and signed in on the PC, tick the account holder's player in Family settings.
   The backend runs `claude -p` (headless, model haiku, no tools).
@@ -76,7 +87,7 @@ To update the site later, run `deploy.py` again and upload the folder (`deploy.p
 
 Consumer subscriptions are personal. Tick only the account holder unless your plan's terms allow more. See DECISIONS.md, D5.
 
-## 6. Backups and restore
+## 7. Backups and restore
 
 - Automatic: a consistent copy of `data\chess.db` every 24 hours in `data\backups\` (14 kept). Family settings →
   "Back up now" makes one on demand. Copy that folder to another machine now and then.
@@ -84,13 +95,14 @@ Consumer subscriptions are personal. Tick only the account holder unless your pl
   `python -c "from server import store; from pathlib import Path; store.restore(Path(r'data\backups\chess-YYYYMMDD-HHMMSS.db'))"`
   in `C:\chess-companion`, then start the task again.
 
-## 7. Recovery checklist
+## 8. Recovery checklist
 
 | Symptom | Fix |
 |---|---|
 | "The chess computer is not answering" | The PC is off or asleep, or the backend stopped. Check the task and `supervisor.log`. On the website it can also mean the relay isn't polling: check `server.log`. |
 | Forgot the family password | `python -c "from server import auth; auth.set_password('family_pw', 'NEW')"` in `C:\chess-companion` (same for `admin_pw`). |
-| A lost phone | Family settings → Devices → Remove. |
+| A lost phone | Family settings → Devices → Remove, or ban it on `admin.html`. |
+| A stranger got in | `admin.html` → Ban + address, then change the family password (Family settings). |
 | AI wording missing | A provider is unavailable (limit reached, signed out, no credit). `server.log` says which. It retries after 5 minutes. |
 | Power cut | Nothing to do: the task starts again, SQLite recovers, and the relay reconnects by itself. |
 | Moving to a new PC | Install as in step 1, copy `data\` and the relay key, then run step 2. |

@@ -20,6 +20,7 @@ async function api(op, args = {}) {
   try { j = await r.json(); } catch (e) { throw new Error('The chess computer is not answering.'); }
   if (!j.ok) {
     if (j.error === 'auth') { localStorage.removeItem('cc.token'); S.token = null; show('login'); }
+    if (j.error === 'blocked') { show('blocked'); throw new Error('This device has been blocked.'); }
     throw new Error(j.error || 'Something went wrong.');
   }
   return j;
@@ -192,6 +193,7 @@ async function boot() {
   try {
     const st = await api('status');
     if (!st.setup) { if (st.local) show('setup'); else { $('#loading-msg').textContent = 'Not set up yet. Open Chess Companion on the server itself first (or set CC_FAMILY_PASSWORD and CC_ADMIN_PASSWORD).'; } return; }
+    if (st.blocked) { show('blocked'); return; }
     if (!st.authed) { show('login'); return; }
     await players();
   } catch (e) { $('#loading-msg').textContent = e.message; setTimeout(boot, 8000); }

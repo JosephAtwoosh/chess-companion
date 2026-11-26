@@ -74,12 +74,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') out(405, ['ok' => false, 'error' => '
 $body = (string)file_get_contents('php://input', false, null, 0, MAX_BODY + 1);
 if (strlen($body) > MAX_BODY || !is_array(json_decode($body, true))) out(400, ['ok' => false, 'error' => 'Bad request.']);
 $token = substr((string)($_SERVER['HTTP_X_CC_TOKEN'] ?? ''), 0, 100);
+$ua = substr((string)preg_replace('/[\x00-\x1f\x7f]/', '', (string)($_SERVER['HTTP_USER_AGENT'] ?? '')), 0, 200);
 
 if ($mode === 'direct') {
     $backend = $cfg['backend'] ?? 'http://127.0.0.1:8765/api';
     $ctx = stream_context_create(['http' => [
         'method' => 'POST', 'timeout' => 60, 'ignore_errors' => true,
-        'header' => "Content-Type: application/json\r\nX-CC-Token: $token\r\nX-CC-Client-IP: $ip\r\n",
+        'header' => "Content-Type: application/json\r\nX-CC-Token: $token\r\nX-CC-Client-IP: $ip\r\nX-CC-UA: $ua\r\n",
         'content' => $body]]);
     $resp = @file_get_contents($backend, false, $ctx);
     if ($resp === false) out(503, ['ok' => false, 'error' => 'The chess computer is not answering. Is it switched on?']);
@@ -98,7 +99,7 @@ $hits[] = time(); file_put_contents($rl, implode(',', $hits));
 if (count(glob($QUEUE . '/*.req') ?: []) > 50) out(503, ['ok' => false, 'error' => 'Busy, please try again.']);
 
 $id = bin2hex(random_bytes(16));
-$item = ['id' => $id, 'ts' => time(), 'ip' => $ip, 'token' => $token, 'body' => json_decode($body, true)];
+$item = ['id' => $id, 'ts' => time(), 'ip' => $ip, 'token' => $token, 'ua' => $ua, 'body' => json_decode($body, true)];
 file_put_contents("$QUEUE/$id.tmp", json_encode($item));
 rename("$QUEUE/$id.tmp", "$QUEUE/$id.req");
 $until = microtime(true) + 45;

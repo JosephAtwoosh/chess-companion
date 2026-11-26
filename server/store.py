@@ -1,4 +1,4 @@
-"""SQLite storage: devices, profiles, games, coach requests. One file: data/chess.db (WAL mode)."""
+"""SQLite storage: devices, bans, profiles, games, coach requests. One file: data/chess.db (WAL mode)."""
 import json
 import shutil
 import sqlite3
@@ -29,6 +29,11 @@ CREATE INDEX IF NOT EXISTS games_profile ON games(profile_id, started);
 CREATE TABLE IF NOT EXISTS coach_log (
   id INTEGER PRIMARY KEY, ts REAL, profile_id INTEGER, game_id INTEGER, kind TEXT,
   provider TEXT, ms INTEGER, ok INTEGER);
+CREATE TABLE IF NOT EXISTS bans (
+  id INTEGER PRIMARY KEY, ip TEXT UNIQUE, note TEXT, created REAL);
+CREATE TABLE IF NOT EXISTS access_log (   -- sign-ins and blocked sign-in tries, kept 30 days
+  id INTEGER PRIMARY KEY, ts REAL, ip TEXT, ua TEXT, event TEXT, device_id INTEGER, detail TEXT);
+CREATE INDEX IF NOT EXISTS access_ts ON access_log(ts);
 """
 
 _local = threading.local()
@@ -44,9 +49,11 @@ def db() -> sqlite3.Connection:
         c.execute("PRAGMA journal_mode=WAL")
         c.execute("PRAGMA synchronous=NORMAL")
         c.executescript(SCHEMA)
-        for col, decl in (("adapt", "TEXT DEFAULT '{}'"),):          # columns added after v1
+        for tbl, col, decl in (("profiles", "adapt", "TEXT DEFAULT '{}'"),       # columns added after v1
+                               ("devices", "last_ip", "TEXT DEFAULT ''"), ("devices", "ua", "TEXT DEFAULT ''"),
+                               ("devices", "banned", "INTEGER DEFAULT 0")):
             try:
-                c.execute(f"ALTER TABLE profiles ADD COLUMN {col} {decl}")
+                c.execute(f"ALTER TABLE {tbl} ADD COLUMN {col} {decl}")
             except sqlite3.OperationalError:
                 pass
         _local.conn = c

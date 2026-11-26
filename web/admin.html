@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Chess Companion · Devices and bans</title>
+<link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="style.css">
+<style>
+  body { overflow: auto; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+  header { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  header a { color: var(--muted); }
+  section.card { background: var(--panel); border-radius: 14px; padding: 16px; margin: 16px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #554b42; vertical-align: middle; }
+  th { color: var(--muted); font-weight: 600; }
+  td.acts { text-align: right; }
+  td.acts button, form.row button { min-height: 36px; padding: 6px 12px; font-size: .85rem; border-radius: 10px; margin: 2px 0 2px 4px; }
+  button.ban { background: var(--bad); }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 8px; font-size: .78rem; font-weight: 700; }
+  .tag.active { background: #2f5d34; } .tag.removed { background: #5a514a; } .tag.banned { background: var(--bad); }
+  .tag.signed_in { background: #2f5d34; } .tag.wrong_password { background: #7a5a12; } .tag.blocked { background: var(--bad); }
+  .mono { font-family: ui-monospace, Consolas, monospace; font-size: .85rem; }
+  form.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+  form.row input { padding: 8px 10px; font-size: .95rem; border-radius: 10px; }
+  #msg { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); padding: 12px 18px; border-radius: 12px;
+         background: #1f1b18; border: 2px solid var(--accent); font-weight: 600; max-width: 90vw; }
+  #msg.err { border-color: var(--bad); }
+  #pw { max-width: 360px; }
+  .empty { color: var(--muted); font-style: italic; }
+  @media (max-width: 900px) { .hide-sm { display: none; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Devices and bans</h1>
+    <span class="small" id="you"></span>
+    <a href="./">← back to the game</a>
+    <button class="quiet" id="refresh" style="min-height:36px;padding:4px 10px;margin-left:auto">↻ Refresh</button>
+  </header>
+
+  <form id="pw" class="stack" hidden>
+    <p>This page needs no password on the chess computer itself. From anywhere else, type the admin password.</p>
+    <label>Admin password <input name="pw" type="password" autocomplete="current-password" required></label>
+    <button class="primary">Open</button>
+  </form>
+
+  <div id="body" hidden>
+    <section class="card">
+      <h2>Devices</h2>
+      <p class="small">Every phone, tablet or computer that has typed the family password. <b>Ban</b> refuses that
+        device even if someone types the password on it again. Clearing the browser's data gets round a device ban,
+        so for a determined visitor use <b>Ban + address</b> as well.</p>
+      <table><thead><tr><th>Name</th><th>Kind</th><th>Last address</th><th class="hide-sm">First seen</th>
+        <th>Last seen</th><th>Status</th><th></th></tr></thead><tbody id="devices"></tbody></table>
+    </section>
+
+    <section class="card">
+      <h2>Banned addresses</h2>
+      <p class="small">A banned address can't sign in or play at all. Home and mobile addresses change from time to
+        time, and a school or mobile network can share one address between many people, so ban an address only when
+        you need to. A range such as <span class="mono">81.2.3.0/24</span> covers 81.2.3.0 to 81.2.3.255.</p>
+      <table><thead><tr><th>Address</th><th>Note</th><th>Since</th><th></th></tr></thead><tbody id="bans"></tbody></table>
+      <form class="row" id="f-ban">
+        <input name="ip" placeholder="Address or range" required class="mono" size="20">
+        <input name="note" placeholder="Note (optional)" maxlength="80" size="24">
+        <button class="ban">Ban address</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Recent sign-ins</h2>
+      <p class="small">Sign-ins, wrong passwords and blocked tries in the last 30 days (newest first).</p>
+      <table><thead><tr><th>When</th><th>Address</th><th>Kind</th><th>Device name typed</th><th>Result</th><th></th></tr></thead>
+        <tbody id="log"></tbody></table>
+    </section>
+  </div>
+</main>
+<div id="msg" hidden></div>
+<script src="admin.js"></script>
+</body>
+</html>

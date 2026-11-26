@@ -25,6 +25,10 @@ def call(op, token=None, ip="127.0.0.1", **kw):
     return app.respond({"op": op, **kw}, token, ip)
 
 
+def adm(action, **kw):          # the admin page, from the server itself
+    return app.respond({"op": "local_admin", "action": action, **kw}, None, "127.0.0.1")
+
+
 class T(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -46,6 +50,46 @@ class T(unittest.TestCase):
             call("login", ip="6.6.6.6", password="bad")
         self.assertIn("Too many", call("login", ip="6.6.6.6", password="family-pass")["error"])
         self.assertFalse(call("admin", self.tok, admin_password="family-pass", action="overview")["ok"])
+
+    def test_bans(self):
+        ua = "Mozilla/5.0 (Linux; Android 14) Chrome/130 Mobile"
+        t = app.respond({"op": "login", "password": "family-pass", "device": "visitor"}, None, "5.5.5.5", ua)["token"]
+        dev = store.one("SELECT * FROM devices WHERE token_hash=?", (auth.tok_hash(t),))
+        self.assertEqual((dev["last_ip"], dev["ua"]), ("5.5.5.5", ua))
+        app.respond({"op": "profiles"}, t, "5.5.5.6")                          # moved address: noted
+        self.assertEqual(store.one("SELECT last_ip FROM devices WHERE id=?", (dev["id"],))["last_ip"], "5.5.5.6")
+        # the admin page: free on the server, admin password elsewhere, never through the website relay
+        self.assertTrue(adm("overview")["ok"])
+        self.assertFalse(call("local_admin", ip="5.5.5.7", action="overview")["ok"])
+        self.assertTrue(call("local_admin", ip="5.5.5.7", action="overview", admin_password="admin-pass")["ok"])
+        self.assertFalse(app.respond({"op": "local_admin", "action": "overview"}, None, "127.0.0.1", "", True)["ok"])
+        # device ban: refused at once, and also after typing the password again on it
+        self.assertTrue(adm("ban_device", device_id=dev["id"])["ok"])
+        self.assertEqual(call("profiles", t, ip="5.5.5.6")["error"], "blocked")
+        self.assertTrue(call("status", t, ip="5.5.5.6")["blocked"])
+        self.assertEqual(call("login", t, ip="5.5.5.6", password="family-pass")["error"], "blocked")
+        self.assertTrue(call("profiles", self.tok)["ok"])                       # others unaffected
+        adm("unban_device", device_id=dev["id"])
+        self.assertEqual(call("profiles", t, ip="5.5.5.6")["error"], "auth")    # unbanned: needs the password again
+        # address and range bans
+        self.assertTrue(adm("ban_ip", ip=" 7.7.7.0/24 ", note="test")["ok"])
+        self.assertEqual(call("login", ip="7.7.7.9", password="family-pass")["error"], "blocked")
+        self.assertTrue(call("login", ip="7.7.8.9", password="family-pass")["ok"])
+        for bad in ("127.0.0.1", "127.0.0.0/8", "0.0.0.0/0", "not an ip"):
+            self.assertFalse(adm("ban_ip", ip=bad)["ok"], bad)
+        self.assertIn("using now", app.respond({"op": "local_admin", "admin_password": "admin-pass", "action": "ban_ip",
+                                                "ip": "7.7.8.0/24"}, None, "7.7.8.9")["error"])
+        ov = adm("overview")
+        self.assertEqual([b["ip"] for b in ov["bans"]], ["7.7.7.0/24"])
+        self.assertEqual(ov["log"][0]["event"], "signed_in")
+        self.assertIn("blocked", [r["event"] for r in ov["log"]])
+        adm("unban_ip", ban_id=ov["bans"][0]["id"])
+        self.assertTrue(call("login", ip="7.7.7.9", password="family-pass")["ok"])
+        # ban a device together with its address
+        t2 = call("login", ip="8.8.4.4", password="family-pass", device="x")["token"]
+        adm("ban_device", device_id=auth.device_row(t2)["id"], with_address=True)
+        self.assertEqual(call("login", ip="8.8.4.4", password="family-pass")["error"], "blocked")
+        self.assertTrue(call("profiles", self.tok)["ok"])                       # the server is never banned
 
     def test_setup_only_local(self):
         os.environ["CC_DATA"] = TMP

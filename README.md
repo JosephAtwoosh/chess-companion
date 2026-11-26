@@ -17,6 +17,7 @@ and for an experienced adult, and each gets their own profile.
 | Area | What you get |
 |---|---|
 | Family access | One family password, checked on the server. Each device is remembered (a random token; only its hash is stored). The admin can remove devices. 10 wrong passwords lock that address for 15 minutes. |
+| Banning | `admin.html` lists every device (name, phone/tablet/computer kind, last address, last seen) and the last 30 days of sign-ins, including wrong passwords. Ban a device, its address, or a whole address range. A banned device sees "This device has been blocked". No password is needed on the server itself; from anywhere else it asks for the admin password. The server's own address can never be banned. |
 | Players | Pick or create a player: a first name or nickname and Child / Teen / Adult. Nothing else is collected. Each player has their own games, level, habits and settings. |
 | Adaptive opponent | No rating needed. Strength is estimated from results (and, for the first games, from move quality), and the opponent level is set so the expected win rate equals your target (10–90%, default 65%). Changes are gradual. Help (hints, best move, danger, plan, takebacks) counts for less. |
 | Human-like play | The opponent searches shallowly and picks among the top 10 moves with a strength-dependent randomness, preferring natural moves (captures, checks). Its mistakes are the kind people make, which leaves tactics for you to find. No result is decided in advance. |
@@ -68,7 +69,8 @@ Then set `CC_TRUST_PROXY=1`, so the login lock-out sees real client addresses.
 1. On each phone or tablet, type the family password once and name the device.
 2. Tap your name (or **+ New player**), choose White or Black, and play by tapping a piece and then a square (or dragging).
 3. Press a coach button whenever you want help. **Repeat** says it again. 🔊 switches sound off.
-4. ☰ menu: New game, Challenge (target win rate), Move stars on/off, Game history, Export PGN, Resign, Change player,
+4. Devices and bans: open `admin.html` (e.g. <http://localhost:8765/admin.html>).
+5. ☰ menu: New game, Challenge (target win rate), Move stars on/off, Game history, Export PGN, Resign, Change player,
    Family settings (admin password: devices, which players get AI wording, backup).
 
 ## Known limitations
