@@ -1,5 +1,5 @@
 // Offline shell only: static files are cached; api.php is never cached (games live on the server).
-const CACHE = 'cc-v1';
+const CACHE = 'cc-v2';
 const SHELL = ['./', 'index.html', 'app.js', 'style.css', 'manifest.webmanifest', 'icon.svg',
   'vendor/chessground.min.js', 'vendor/chess.js', 'vendor/chessground.base.css', 'vendor/chessground.brown.css', 'vendor/chessground.cburnett.css'];
 self.addEventListener('install', (e) => e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())));
