@@ -11,3 +11,17 @@ RewriteRule ^data(/|$) - [F,L]
   Require all granted
 </FilesMatch>
 AddType application/manifest+json .webmanifest
+
+# The page, the app code and the styles must be checked for updates on every visit (the host's default
+# keeps .css for 30 days and .js for 2, so phones kept old versions). A check costs only a quick "not modified".
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|js|css|webmanifest)$">
+    Header set Cache-Control "no-cache"
+    Header unset Expires
+  </FilesMatch>
+</IfModule>
+<IfModule mod_expires.c>
+  <FilesMatch "\.(html|js|css|webmanifest)$">
+    ExpiresActive Off
+  </FilesMatch>
+</IfModule>
