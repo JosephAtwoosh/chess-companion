@@ -5,7 +5,7 @@ import { Chess } from './vendor/chess.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
-const S = { token: localStorage.getItem('cc.token'), player: null, game: null, lastSpeech: '', busy: false,
+const S = { token: localStorage.getItem('cc.token'), player: null, game: null, lastSpeech: '', busy: false, sending: false,
             sound: localStorage.getItem('cc.sound') !== 'off', stars: localStorage.getItem('cc.stars') !== 'off' };
 let cg = null;
 
@@ -97,7 +97,7 @@ function drawGame(g, animate = true) {
   if (!cg) { cg = Chessground($("#board"), cfg); window._cg = cg; } else cg.set(cfg);
   cg.setAutoShapes([]);
   $('#g-level').textContent = 'Opponent ' + g.level;
-  $('#b-undo').disabled = g.status !== 'playing' || !g.moves.length;
+  $('#b-undo').disabled = S.sending || g.status !== 'playing' || !g.moves.length;
   if (g.status === 'playing') {
     setStatus(g.your_turn ? (g.check ? 'Check! Your move.' : 'Your move') : 'Computer is thinking…');
     $('#banner').hidden = true;
@@ -132,6 +132,23 @@ function showResult(g) {
   $('#b-again').onclick = () => openNew();
 }
 
+// While a move or an undo is on its way to the server, Undo is greyed out and extra taps are ignored.
+// Without this, a double tap or a tap during "Computer is thinking…" sent two requests; the answers
+// could arrive in the wrong order, the board then showed a position the server no longer had, every
+// next move was refused and the game looked frozen.
+function sending(on) {
+  S.sending = on;
+  $('#b-undo').disabled = on || !S.game || S.game.status !== 'playing' || !S.game.moves.length;
+}
+
+// After an error, fetch the real position from the server rather than redrawing what we had,
+// so the board can never get stuck out of step with the server.
+async function resync() {
+  if (!S.game) return;
+  try { const { game } = await api('game_open', { gid: S.game.id }); drawGame(game, false); showMoveRating(null); }
+  catch (e) { drawGame(S.game, false); }
+}
+
 async function onUserMove(orig, dest) {
   const chess = new Chess(S.game.fen);
   const piece = chess.get(orig);
@@ -141,11 +158,13 @@ async function onUserMove(orig, dest) {
   }
   const uci = orig + dest + promo;
   cg.set({ movable: { color: undefined } });
+  sending(true);
   click(!!chess.get(dest));
   setStatus('Computer is thinking…');
   cg.setAutoShapes([]);
   try {
     const { game, feedback } = await api('move', { gid: S.game.id, uci });
+    sending(false);
     if (game.moves.length > S.game.moves.length + 1) setTimeout(() => click(false), 50);
     drawGame(game);
     showMoveRating(game);   // stars are shown, never spoken (too distracting)
@@ -156,8 +175,9 @@ async function onUserMove(orig, dest) {
     else if (game.last_rating && game.last_rating.stars <= 2 && S.stars) $('#caption').textContent = 'Press Undo to try a different move.';
     else $('#caption').textContent = '';
   } catch (e) {
+    sending(false);
     toast(e.message);
-    drawGame(S.game, false);
+    resync();
   }
 }
 
@@ -345,14 +365,17 @@ $$('.coach button').forEach((b) => (b.onclick = () => ask(b.dataset.k, b)));
 $('#b-repeat').onclick = () => { if (S.lastSpeech) speak(S.lastSpeech); };
 $('#b-new').onclick = openNew;
 $('#b-undo').onclick = async () => {
-  try { const { game } = await api('undo', { gid: S.game.id }); drawGame(game); showMoveRating(null); $('#caption').textContent = '';
-        if (S.stars) setStatus('Taken back. Try another move!'); } catch (e) { toast(e.message); }
+  if (S.sending || !S.game) return;        // a second tap (or a tap while the computer thinks) is ignored
+  sending(true);
+  try { const { game } = await api('undo', { gid: S.game.id }); sending(false); drawGame(game); showMoveRating(null); $('#caption').textContent = '';
+        if (S.stars) setStatus('Taken back. Try another move!'); }
+  catch (e) { sending(false); toast(e.message); resync(); }
 };
 function soundIcon() { $('#b-sound').textContent = S.sound ? '🔊' : '🔇'; }
-$('#b-sound').onclick = () => { S.sound = !S.sound; localStorage.setItem('cc.sound', S.sound ? 'on' : 'off'); soundIcon();
 function starsLabel() { $('#m-stars').textContent = 'Move stars: ' + (S.stars ? 'on' : 'off'); }
-starsLabel(); if (!S.sound) speechSynthesis.cancel(); };
-soundIcon();
+$('#b-sound').onclick = () => { S.sound = !S.sound; localStorage.setItem('cc.sound', S.sound ? 'on' : 'off'); soundIcon();
+  if (!S.sound) speechSynthesis.cancel(); };
+soundIcon(); starsLabel();
 $('#b-menu').onclick = () => $('#d-menu').showModal();
 $$('#d-new [data-c]').forEach((b) => (b.onclick = () => (b.dataset.c === 'cancel' ? $('#d-new').close() : newGame(b.dataset.c))));
 $$('dialog [data-close]').forEach((b) => (b.onclick = () => b.closest('dialog').close()));
