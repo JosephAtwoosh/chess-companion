@@ -6,7 +6,8 @@ import { Chess } from './vendor/chess.js';
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const S = { token: localStorage.getItem('cc.token'), player: null, game: null, lastSpeech: '', busy: false,
-            sound: localStorage.getItem('cc.sound') !== 'off', stars: localStorage.getItem('cc.stars') !== 'off' };
+            sound: localStorage.getItem('cc.sound') !== 'off', stars: localStorage.getItem('cc.stars') !== 'off',
+            pending: false, seq: 0 };   // pending: a move or undo is waiting for the server; seq: drops stale answers
 let cg = null;
 
 // ------------------------------------------------------------------ server
@@ -95,8 +96,11 @@ function drawGame(g, animate = true) {
   };
   if (!cg) { cg = Chessground($("#board"), cfg); window._cg = cg; } else cg.set(cfg);
   cg.setAutoShapes([]);
+  // the board caches where it is on screen; re-measure in case the page moved (phones can shift it without a
+  // scroll event, and then taps land on the wrong squares and the board seems frozen)
+  try { cg.state.dom.bounds.clear(); } catch (e) {}
   $('#g-level').textContent = 'Opponent ' + g.level;
-  $('#b-undo').disabled = g.status !== 'playing' || !g.moves.length;
+  updateUndo();
   if (g.status === 'playing') {
     setStatus(g.your_turn ? (g.check ? 'Check! Your move.' : 'Your move') : 'Computer is thinking…');
     $('#banner').hidden = true;
@@ -140,11 +144,14 @@ async function onUserMove(orig, dest) {
   }
   const uci = orig + dest + promo;
   cg.set({ movable: { color: undefined } });
+  const my = ++S.seq; S.pending = true; updateUndo();
   click(!!chess.get(dest));
   setStatus('Computer is thinking…');
   cg.setAutoShapes([]);
   try {
     const { game, feedback } = await api('move', { gid: S.game.id, uci });
+    if (my !== S.seq) return;   // an older answer (the board has moved on since)
+    S.pending = false;
     if (game.moves.length > S.game.moves.length + 1) setTimeout(() => click(false), 50);
     drawGame(game);
     showMoveRating(game);   // stars are shown, never spoken (too distracting)
@@ -155,9 +162,18 @@ async function onUserMove(orig, dest) {
     else if (game.last_rating && game.last_rating.stars <= 2 && S.stars) $('#caption').textContent = 'Press Undo to try a different move.';
     else $('#caption').textContent = '';
   } catch (e) {
+    if (my !== S.seq) return;
+    S.pending = false;
     toast(e.message);
     drawGame(S.game, false);
   }
+}
+
+// Undo only when the player has a move of their own to take back and nothing is on its way to the server
+function updateUndo() {
+  const g = S.game;
+  const mine = g && g.moves ? (g.color === 'black' ? Math.floor(g.moves.length / 2) : Math.ceil(g.moves.length / 2)) : 0;
+  $('#b-undo').disabled = S.pending || !g || g.status !== 'playing' || mine < 1;
 }
 
 function askPromotion(color) {
@@ -217,6 +233,7 @@ async function players() {
 
 async function choosePlayer(p) {
   S.player = p;
+  S.seq++; S.pending = false;
   localStorage.setItem('cc.player', p.id);
   $('#g-name').textContent = p.name;
   show('game');
@@ -237,6 +254,7 @@ function openNew() {
 
 async function newGame(color) {
   $('#d-new').close();
+  S.seq++; S.pending = false;   // forget answers still on their way for the old game
   setStatus('Setting up the board…');
   try { const { game } = await api('game_new', { pid: S.player.id, color }); drawGame(game); showMoveRating(null); $('#caption').textContent = ''; }
   catch (e) { toast(e.message); }
@@ -343,14 +361,25 @@ $$('.coach button').forEach((b) => (b.onclick = () => ask(b.dataset.k, b)));
 $('#b-repeat').onclick = () => { if (S.lastSpeech) speak(S.lastSpeech); };
 $('#b-new').onclick = openNew;
 $('#b-undo').onclick = async () => {
-  try { const { game } = await api('undo', { gid: S.game.id }); drawGame(game); showMoveRating(null); $('#caption').textContent = '';
-        if (S.stars) setStatus('Taken back. Try another move!'); } catch (e) { toast(e.message); }
+  if (S.pending || !S.game) return;
+  const my = ++S.seq; S.pending = true; updateUndo();
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  try {
+    const { game } = await api('undo', { gid: S.game.id });
+    if (my !== S.seq) return;
+    S.pending = false;
+    drawGame(game); showMoveRating(null); $('#caption').textContent = '';
+    if (S.stars) setStatus('Taken back. Try another move!');
+  } catch (e) {
+    if (my !== S.seq) return;
+    S.pending = false; toast(e.message); drawGame(S.game, false);
+  }
 };
 function soundIcon() { $('#b-sound').textContent = S.sound ? '🔊' : '🔇'; }
 $('#b-sound').onclick = () => { S.sound = !S.sound; localStorage.setItem('cc.sound', S.sound ? 'on' : 'off'); soundIcon();
+  if (!S.sound && 'speechSynthesis' in window) speechSynthesis.cancel(); };
 function starsLabel() { $('#m-stars').textContent = 'Move stars: ' + (S.stars ? 'on' : 'off'); }
-starsLabel(); if (!S.sound) speechSynthesis.cancel(); };
-soundIcon();
+soundIcon(); starsLabel();
 $('#b-menu').onclick = () => $('#d-menu').showModal();
 $$('#d-new [data-c]').forEach((b) => (b.onclick = () => (b.dataset.c === 'cancel' ? $('#d-new').close() : newGame(b.dataset.c))));
 $$('dialog [data-close]').forEach((b) => (b.onclick = () => b.closest('dialog').close()));

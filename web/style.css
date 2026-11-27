@@ -6,7 +6,7 @@
   font-size: 18px; color: var(--ink); background: var(--bg);
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; background: var(--bg); overscroll-behavior: none; overflow-x: hidden; }
+html, body { margin: 0; height: 100%; background: var(--bg); overscroll-behavior: none; overflow-x: clip; }
 .cg-wrap coords.files { right: 0; left: 0; }
 .cg-wrap coords { font-size: 9px; }
 [hidden] { display: none !important; }
@@ -48,17 +48,20 @@ button:disabled { opacity: .45; }
 button.icon { background: transparent; font-size: 1.6rem; min-height: 48px; min-width: 52px; padding: 0; }
 
 .play { display: flex; flex-direction: column; align-items: center; }
-.board-wrap { position: relative; width: min(100vw, calc(100dvh - var(--bar) - 220px)); min-width: 280px; aspect-ratio: 1; }
+/* --side-h is the height reserved under the board for the panel below; keep it in step with the sizes below
+   so the whole game (Undo included) fits on a phone screen without scrolling */
+.play { --side-h: 262px; }
+.board-wrap { position: relative; width: min(100vw, calc(100dvh - var(--bar) - var(--side-h))); min-width: 240px; aspect-ratio: 1; }
 #board { width: 100%; height: 100%; }
-.side { width: min(100vw, 640px); padding: 6px 8px calc(8px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 6px; }
-.status { margin: 0; text-align: center; font-weight: 700; min-height: 1.4em; }
-.caption { margin: 0; text-align: center; color: var(--muted); font-size: .95rem; line-height: 1.3; height: 3.9em; overflow-y: auto; }
-.coach { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.coach button { font-size: 1.35rem; padding: 6px 4px; min-height: 62px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; line-height: 1.1; }
-.coach button span { font-size: .72rem; font-weight: 600; }
+.side { width: min(100vw, 640px); padding: 4px 8px calc(6px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 4px; }
+.status { margin: 0; text-align: center; font-weight: 700; font-size: .95rem; height: 1.35em; line-height: 1.35; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.caption { margin: 0; text-align: center; color: var(--muted); font-size: .82rem; line-height: 1.3; height: 2.6em; overflow-y: auto; }
+.coach { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.coach button { font-size: 1.05rem; padding: 4px 3px; min-height: 0; height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; line-height: 1.1; border-radius: 12px; }
+.coach button span { font-size: .66rem; font-weight: 600; }
 .coach button.busy { background: var(--accent); color: #241d10; }
-.tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.tools button { min-height: 48px; font-size: .95rem; padding: 8px; }
+.tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.tools button { min-height: 0; height: 42px; font-size: .88rem; padding: 4px 6px; border-radius: 12px; white-space: nowrap; }
 
 /* landscape: board on the left, buttons on the right */
 @media (min-aspect-ratio: 1/1) {
@@ -66,8 +69,9 @@ button.icon { background: transparent; font-size: 1.6rem; min-height: 48px; min-
   .board-wrap { width: min(calc(100dvh - var(--bar) - 16px), calc(100vw - 340px)); }
   .side { width: 320px; padding-top: 0; }
   .coach { grid-template-columns: repeat(2, 1fr); }
-  .coach button { min-height: 76px; font-size: 1.6rem; }
-  .coach button span { font-size: .85rem; }
+  .coach button { height: 68px; font-size: 1.4rem; }
+  .coach button span { font-size: .8rem; }
+  .caption { height: 3.9em; font-size: .9rem; }
 }
 
 /* high-contrast board colours on top of the brown theme */
@@ -103,9 +107,15 @@ svg.spark { width: 100%; height: 60px; background: #1f1b18; border-radius: 10px;
 .banner .report { margin: 8px 0 4px; font-size: .95rem; line-height: 1.35; }
 .banner { top: 18%; max-height: 76%; overflow-y: auto; }
 
-.moverate { margin: 0; text-align: center; min-height: 1.6em; font-weight: 600; }
-.moverate .st { color: var(--accent); font-size: 1.35rem; letter-spacing: 2px; vertical-align: -2px; }
+/* one line, fixed height: the panel must not change size when the stars come and go (after Undo) */
+.moverate { margin: 0; text-align: center; height: 1.4em; line-height: 1.4; font-size: .88rem; font-weight: 600; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.moverate .st { color: var(--accent); font-size: 1.05rem; letter-spacing: 1px; vertical-align: -1px; }
 .moverate .st i { color: #5a4f45; font-style: normal; }
 .moverate.low { color: #ffb0a8; }
 .tools button.suggest { background: var(--accent); color: #241d10; }
 .toast { position: absolute; left: 6%; right: 6%; top: 42%; background: #8b1e17; color: #fff; border-radius: 14px; padding: 14px; text-align: center; font-weight: 700; z-index: 6; box-shadow: 0 6px 24px rgba(0,0,0,.5); }
+@media (max-width: 400px) {
+  .moverate { font-size: .78rem; }
+  .moverate .st { font-size: .9rem; letter-spacing: 0; }
+  .tools button { font-size: .8rem; padding: 4px 3px; overflow: hidden; text-overflow: ellipsis; }
+}
